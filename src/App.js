@@ -2,8 +2,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { io } from "socket.io-client";
 
+// read from CRA env-var (fallback to localhost for dev)
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:3001";
+
 // Initialize Socket.IO client
-const socket = io("http://localhost:3001");
+const socket = io(API_BASE);
 
 function App() {
   const [sender, setSender] = useState("");
@@ -16,7 +19,7 @@ function App() {
     const fetchMessages = async () => {
       if (!sender || !receiver) return;
       try {
-        const res = await axios.get("http://localhost:3001/messages/history", {
+        const res = await axios.get(`${API_BASE}/messages/history`, {
           params: { user1: sender, user2: receiver },
         });
         setMessages(res.data);
@@ -53,7 +56,6 @@ function App() {
     const payload = { sender, receiver, text };
     socket.emit("send_message", payload);
     setText("");
-    // no fetchMessages() here—socket listener will append it once the server echoes it
   };
 
   return (
